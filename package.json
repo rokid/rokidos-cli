@@ -1,0 +1,24 @@
+{
+  "name": "@rokid/roah-cli",
+  "version": "0.1.0",
+  "description": "An development tool for RoahOS which includes: connect, list devices, install apps, flash and etc.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "roah": "bin/roah"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.rokid-inc.com:roahos/roah-cli.git"
+  },
+  "keywords": [
+    "RoahOS",
+    "Rokid",
+    "ADB",
+    "CLI"
+  ],
+  "author": "Yazhong Liu <yazhong.liu@rokid.com>",
+  "license": "MIT"
+}

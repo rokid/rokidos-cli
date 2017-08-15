@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+#
+# Setup.
+#
+
+VERSION="0.1.0"
+
+#
+# Log <type> <msg>
+#
+
+log() {
+  printf "  \033[36m%10s\033[0m : \e[2m%s\e[22m\033[0m\n" $1 $2
+}
+
+#
+# Exit with the given <msg ...>
+#
+
+abort() {
+  printf "\n  \033[31mError: $@\033[0m\n\n" && exit 1
+}
+
+
+#
+# Output usage information.
+#
+
+display_help() {
+  cat <<-EOF
+  Usage: roah [COMMAND] [args]
+  Commands:
+    devices                      List connected devices
+    shell                        Wait for an connectable device and shell
+  Options:
+    -V, --version   Output current version of n
+    -h, --help      Display help information
+EOF
+}
+
+#
+# Output n version.
+#
+
+display_version() {
+  echo $VERSION && exit 0
+}
+
+#
+# Hide cursor.
+#
+
+hide_cursor() {
+  printf "\e[?25l"
+}
+
+#
+# Show cursor.
+#
+
+show_cursor() {
+  printf "\e[?25h"
+}
+
+#
+# Move up a line and erase.
+#
+
+erase_line() {
+  printf "\033[1A\033[2K"
+}
+
+#
+# Handle arguments.
+#
+
+install_rpp() {
+  # TODO
+  cd $1
+  local project=`pwd`
+  local filename=$(basename "$project")
+  adb push $project /opt/apps/
+}
+
+run_script() {
+  local filename=$(basename "$1")
+  adb push $1 /tmp/$filename
+  adb shell node /tmp/$filename
+  adb shell rm /tmp/$filename
+}
+
+while test $# -ne 0; do
+  case $1 in
+    -V|--version) display_version ;;
+    -h|--help|help) display_help; exit ;;
+    devices) adb devices; exit ;;
+    shell) adb wait-for-device && adb shell; exit ;;
+    install) install_rpp $2; exit ;;
+    run) run_script $2; exit ;;
+    *) display_help; exit ;;
+  esac
+  shift
+done
