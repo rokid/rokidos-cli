@@ -3,15 +3,15 @@
 RokidOS 命令行工具，提供了如下命令：
 
 ```sh
-Usage: rokid [command]
+Usage: rokid/ro [command]
 
-rokid help                 Get helps
-rokid devices              List connected devices
-rokid run [file]           Run scripts on device
-rokid shell <command>      Wait for an connectable device and shell
-rokid test <dir>           Run tests on your device
-rokid install <dir>        Install the Rokid App from directory
-rokid build <dir>          Build the Rokid App to .rpp
+ro help                 Get helps
+ro devices              List connected devices
+ro run [file]           Run scripts on device
+ro shell <command>      Wait for an connectable device and shell
+ro test <dir>           Run tests on your device
+ro install <dir>        Install the Rokid App from directory
+ro build <dir>          Build the Rokid App to .rpp
 
 rokid@${VERSION}
 ```
