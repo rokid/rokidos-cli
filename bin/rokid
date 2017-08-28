@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+#
+# Setup.
+#
+
+VERSION="1.0.0"
+
+display_help() {
+  cat <<-EOF
+
+Usage: rokid [command]
+
+rokid help                 Get helps
+rokid devices              List connected devices
+rokid run [file]           Run scripts on device
+rokid shell <command>      Wait for an connectable device and shell
+rokid test <dir>           Run tests on your device
+rokid install <dir>        Install the Rokid App from directory
+rokid build <dir>          Build the Rokid App to .rpp
+
+rokid@${VERSION}
+EOF
+}
+
+display_version() {
+  echo "roah@${VERSION}" && exit 0
+}
+
+build_rpp() {
+  local current=`pwd`
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  local root=`pwd`
+  local config=$root/webpack.config.js
+  cd $current
+  $root/node_modules/.bin/webpack \
+    --config $config
+  node $root/postbuild.js
+}
+
+install_rpp() {
+  local rpp_path=$1
+  if [ -z "$1" ]; then
+    build_rpp
+    rpp_path=`find *.rpp | head -n1`
+  fi
+  adb shell mkdir -p /tmp/installers
+  adb push $rpp_path /tmp/installers/
+  adb shell pkgm-install $rpp_path
+  printf "\033[32m$rpp_path installed\033[0m\n"
+}
+
+run_script() {
+  local filename=$(basename "$1")
+  adb push $1 /tmp/$filename
+  adb shell node /tmp/$filename
+  adb shell rm /tmp/$filename
+}
+
+run_test() {
+  local testdir=/tmp/tests
+  # create test directory
+  adb shell mkdir -p $testdir
+  adb push ./tests $testdir
+  # change the workdir to source dir
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  adb push lib $testdir
+  adb shell node $testdir/lib/executor.js
+  adb shell rm -r $testdir
+}
+
+debug_mode() {
+  adb shell killall -9 ams
+  adb shell killall -9 node
+  adb shell ams
+}
+
+adb wait-for-device
+while test $# -ne 0; do
+  case $1 in
+    -V|--version) display_version ;;
+    -h|--help|help) display_help; exit ;;
+    devices) adb devices; exit ;;
+    shell) adb wait-for-device && adb shell; exit ;;
+    shell-node ) adb wait-for-device && adb shell node; exit ;;
+    install) install_rpp $2; exit ;;
+    build) build_rpp $2; exit ;;
+    run) run_script $2; exit ;;
+    test) run_test $2; exit ;;
+    debug) debug_mode; exit ;; # to be removed
+    *) display_help; exit ;;
+  esac
+  shift
+done
