@@ -1,6 +1,6 @@
-# Rokid Linux CLI
+# RokidOS CLI
 
-Rokid Linux 命令行工具，提供了如下命令：
+RokidOS 命令行工具，提供了如下命令：
 
 ```sh
 Usage: rokid [command]
