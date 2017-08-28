@@ -5,6 +5,7 @@
 #
 
 VERSION="1.0.0"
+ADB=""
 
 display_help() {
   cat <<-EOF
@@ -27,6 +28,15 @@ display_version() {
   echo "roah@${VERSION}" && exit 0
 }
 
+init_adb() {
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  local root=`pwd`
+  ADB=$root/tools/adb
+  echo "use adb: $ADB"
+}
+
 build_rpp() {
   local current=`pwd`
   cd $(dirname $0)
@@ -46,47 +56,48 @@ install_rpp() {
     build_rpp
     rpp_path=`find *.rpp | head -n1`
   fi
-  adb shell mkdir -p /tmp/installers
-  adb push $rpp_path /tmp/installers/
-  adb shell pkgm-install $rpp_path
+  $ADB shell mkdir -p /tmp/installers
+  $ADB push $rpp_path /tmp/installers/
+  $ADB shell pkgm-install $rpp_path
   printf "\033[32m$rpp_path installed\033[0m\n"
 }
 
 run_script() {
   local filename=$(basename "$1")
-  adb push $1 /tmp/$filename
-  adb shell node /tmp/$filename
-  adb shell rm /tmp/$filename
+  $ADB push $1 /tmp/$filename
+  $ADB shell node /tmp/$filename
+  $ADB shell rm /tmp/$filename
 }
 
 run_test() {
   local testdir=/tmp/tests
   # create test directory
-  adb shell mkdir -p $testdir
-  adb push ./tests $testdir
+  $ADB shell mkdir -p $testdir
+  $ADB push ./tests $testdir
   # change the workdir to source dir
   cd $(dirname $0)
   cd $(dirname `readlink -n $0`)
   cd ../
-  adb push lib $testdir
-  adb shell node $testdir/lib/executor.js
-  adb shell rm -r $testdir
+  $ADB push lib $testdir
+  $ADB shell node $testdir/lib/executor.js
+  $ADB shell rm -r $testdir
 }
 
 debug_mode() {
-  adb shell killall -9 ams
-  adb shell killall -9 node
-  adb shell ams
+  $ADB shell killall -9 ams
+  $ADB shell killall -9 node
+  $ADB shell ams
 }
 
-adb wait-for-device
+init_adb
+$ADB wait-for-device
 while test $# -ne 0; do
   case $1 in
     -V|--version) display_version ;;
     -h|--help|help) display_help; exit ;;
-    devices) adb devices; exit ;;
-    shell) adb wait-for-device && adb shell; exit ;;
-    shell-node ) adb wait-for-device && adb shell node; exit ;;
+    devices) $ADB devices; exit ;;
+    shell) $ADB shell; exit ;;
+    shell-node ) $ADB shell node; exit ;;
     install) install_rpp $2; exit ;;
     build) build_rpp $2; exit ;;
     run) run_script $2; exit ;;
