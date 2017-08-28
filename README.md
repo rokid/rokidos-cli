@@ -19,7 +19,7 @@ rokid@${VERSION}
 ### 安装
 
 ```sh
-$ npm install rokid-linux-cli -g
+$ npm install rokidos-cli -g
 ```
 
 ### 授权
