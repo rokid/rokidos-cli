@@ -1,6 +1,6 @@
 {
   "name": "rokidos-cli",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "The development command line tool for ROL(Rokid Open Linux)",
   "main": "lib/index.js",
   "scripts": {
