@@ -29,12 +29,14 @@ display_version() {
 }
 
 init_adb() {
+  local oldir=`pwd`
   cd $(dirname $0)
   cd $(dirname `readlink -n $0`)
   cd ../
   local root=`pwd`
   ADB=$root/tools/adb
   echo "use adb: $ADB"
+  cd $oldir
 }
 
 build_rpp() {
@@ -86,7 +88,7 @@ run_test() {
 debug_mode() {
   $ADB shell killall -9 ams
   $ADB shell killall -9 node
-  $ADB shell ams
+  $ADB shell NODE_PATH=/usr/lib/node_modules ams
 }
 
 init_adb
