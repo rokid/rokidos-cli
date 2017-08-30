@@ -67,7 +67,7 @@ install_rpp() {
 run_script() {
   local filename=$(basename "$1")
   $ADB push $1 /tmp/$filename
-  $ADB shell node /tmp/$filename
+  $ADB shell NODE_PATH=/usr/lib/node_modules node /tmp/$filename
   $ADB shell rm /tmp/$filename
 }
 
@@ -81,7 +81,7 @@ run_test() {
   cd $(dirname `readlink -n $0`)
   cd ../
   $ADB push lib $testdir
-  $ADB shell node $testdir/lib/executor.js
+  $ADB shell NODE_PATH=/usr/lib/node_modules node $testdir/lib/executor.js
   $ADB shell rm -r $testdir
 }
 
@@ -99,7 +99,7 @@ while test $# -ne 0; do
     -h|--help|help) display_help; exit ;;
     devices) $ADB devices; exit ;;
     shell) $ADB shell; exit ;;
-    shell-node ) $ADB shell node; exit ;;
+    shell-node ) $ADB shell NODE_PATH=/usr/lib/node_modules node; exit ;;
     install) install_rpp $2; exit ;;
     build) build_rpp $2; exit ;;
     run) run_script $2; exit ;;
