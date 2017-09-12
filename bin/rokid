@@ -52,6 +52,15 @@ build_rpp() {
   node $root/postbuild.js
 }
 
+log() {
+  # change the workdir to source dir
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  # run log-filter
+  run_script lib/log-filter.js $1
+}
+
 install_rpp() {
   local rpp_path=$1
   if [ -z "$1" ]; then
@@ -67,7 +76,7 @@ install_rpp() {
 run_script() {
   local filename=$(basename "$1")
   $ADB push $1 /tmp/$filename
-  $ADB shell NODE_PATH=/usr/lib/node_modules node /tmp/$filename
+  $ADB shell NODE_PATH=/usr/lib/node_modules node /tmp/$filename $2
   $ADB shell rm /tmp/$filename
 }
 
@@ -100,6 +109,7 @@ while test $# -ne 0; do
     devices) $ADB devices; exit ;;
     shell) $ADB shell; exit ;;
     shell-node ) $ADB shell NODE_PATH=/usr/lib/node_modules node; exit ;;
+    log) log $2; exit ;;
     install) install_rpp $2; exit ;;
     build) build_rpp $2; exit ;;
     run) run_script $2; exit ;;
