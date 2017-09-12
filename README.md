@@ -10,6 +10,7 @@ ro devices              List connected devices
 ro run [file]           Run scripts on device
 ro shell <command>      Wait for an connectable device and shell
 ro test <dir>           Run tests on your device
+ro log <filter>         Show the logs of connected device by comma-based filter
 ro install <dir>        Install the Rokid App from directory
 ro build <dir>          Build the Rokid App to .rpp
 
