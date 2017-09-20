@@ -85,6 +85,7 @@ run_test() {
   local testdir=/tmp/tests
   # create test directory
   $ADB shell mkdir -p $testdir
+  $ADB shell rm -rf $testdir/*
   $ADB push ./tests $testdir
   # change the workdir to source dir
   cd $(dirname $0)
