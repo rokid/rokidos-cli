@@ -58,6 +58,7 @@ test('test voice play', (t) => {
   t.send(<asr>, <nlp>, <action>);
   t.assert(<event>, <value>, (data) => {
     // got event
+    t.done();
   });
 });
 ```
