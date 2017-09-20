@@ -43,6 +43,12 @@ test('test voice play', (t) => {
     "version": "2.0.0"
   });
   t.assert('voice', '音乐继续');
-  t.assert('media.stop', true);
+  t.assert('media.play', 'https://music-proxy.rokid-inc.com/content/01/245/1245352-MP3-320K-FTD.mp3?sign=p8sDiQmqAYkZ9jR5wiWTSw8CAnFhPTEwMDM5ODY3Jms9QUtJRE1Fdm53SXdwNFlqUlU1NHhxd3VLQlRYMExOOWdJVFNRJmU9MTUwMzY0Njk1MSZ0PTE1MDM0NzQxNTEmcj0xOTU3OTgxMjMzJmY9L2NvbnRlbnQvMDEvMjQ1LzEyNDUzNTItTVAzLTMyMEstRlRELm1wMyZiPXVsdGltYXRl&transDeliveryCode=RK@21829674@1503474151@S&token=play_random$$ULT$$1245352', () => {
+    t.done();
+  });
   // t.assert('media.play', );
+});
+
+test('demo', (t) => {
+  t.done();
 });
