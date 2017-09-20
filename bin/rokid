@@ -4,7 +4,7 @@
 # Setup.
 #
 
-VERSION="1.0.0"
+VERSION="0.8.1"
 ADB=""
 
 display_help() {

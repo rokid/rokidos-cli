@@ -1,6 +1,6 @@
-# RokidOS CLI
+# rokidos-cli
 
-RokidOS 命令行工具，提供了如下命令：
+为`RokidOS`极客们量身打造的命令行工具，主要用于安装、构建、测试以及发布你的`RokidOS`应用。
 
 ```sh
 Usage: rokid/ro [command]
@@ -17,15 +17,17 @@ ro build <dir>          Build the Rokid App to .rpp
 rokid@${VERSION}
 ```
 
-### 安装
+### 如何安装
+
+我们通过`npm`提供该工具包，因此确保你成功安装了`Node.js`环境后：
 
 ```sh
 $ npm install rokidos-cli -g
 ```
 
-### 命令
+### 已支持命令
 
-这里简单介绍一下每个命令的用法
+在该章节，我们将会介绍一些基本用法。
 
 ##### 应用相关
 
