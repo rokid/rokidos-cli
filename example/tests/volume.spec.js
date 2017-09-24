@@ -3,7 +3,7 @@ const volume = require('@rokid/volume');
 
 test('test voice mute', (t) => {
   t.send('若琪我要静音', {
-    "appId": "7D0F5E5D5",
+    "appId": "7D0F5E5D57CD496B940654D7C8963AE0",
     "asr": "我要静音",
     "cloud": false,
     "intent": "volumemute",
