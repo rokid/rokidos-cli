@@ -13,6 +13,7 @@ display_help() {
 Usage: rokid [command]
 
 rokid help                 Get helps
+rokid search               Search your devices and configuring network
 rokid devices              List connected devices
 rokid run [file]           Run scripts on device
 rokid shell <command>      Wait for an connectable device and shell
@@ -102,15 +103,13 @@ debug_mode() {
   $ADB shell NODE_PATH=/usr/lib/node_modules ams
 }
 
-init_adb
-$ADB wait-for-device
-while test $# -ne 0; do
+adb_commands() {
+  init_adb
+  $ADB wait-for-device
   case $1 in
-    -V|--version) display_version ;;
-    -h|--help|help) display_help; exit ;;
     devices) $ADB devices; exit ;;
     shell) $ADB shell; exit ;;
-    shell-node ) $ADB shell NODE_PATH=/usr/lib/node_modules node; exit ;;
+    node ) $ADB shell NODE_PATH=/usr/lib/node_modules node; exit ;;
     log) log $2; exit ;;
     install) install_rpp $2; exit ;;
     build) build_rpp $2; exit ;;
@@ -118,6 +117,15 @@ while test $# -ne 0; do
     test) run_test $2; exit ;;
     debug) debug_mode; exit ;; # to be removed
     *) display_help; exit ;;
+  esac
+}
+
+while test $# -ne 0; do
+  case $1 in
+    -V|--version) display_version ;;
+    -h|--help|help) display_help; exit ;;
+    search) rokid-search; exit ;;
+    *) adb_commands $1; exit;;
   esac
   shift
 done
