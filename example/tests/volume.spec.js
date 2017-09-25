@@ -3,12 +3,12 @@ const volume = require('@rokid/volume');
 
 test('test voice mute', (t) => {
   t.send('若琪我要静音', {
-    "appId": "7D0F5E5D57CD496B940654D7C8963AE0",
-    "asr": "我要静音",
-    "cloud": false,
-    "intent": "volumemute",
-    "pattern": "($nowtime|$datetime$parttime?|$twoday|$period|$parttime)?($location)的?$weather$how?",
-    "slots": {}
+    'appId': '7D0F5E5D57CD496B940654D7C8963AE0',
+    'asr': '我要静音',
+    'cloud': false,
+    'intent': 'volumemute',
+    'pattern': '($nowtime|$datetime$parttime?|$twoday|$period|$parttime)?($location)的?$weather$how?',
+    'slots': {}
   }, {});
 
   t.assert('voice', '音量已调到5');
