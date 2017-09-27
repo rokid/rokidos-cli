@@ -4,7 +4,7 @@
 # Setup.
 #
 
-VERSION="0.8.1"
+VERSION="0.10.1"
 ADB=""
 
 display_help() {
@@ -125,7 +125,7 @@ while test $# -ne 0; do
     -V|--version) display_version ;;
     -h|--help|help) display_help; exit ;;
     search) rokid-search; exit ;;
-    *) adb_commands $1; exit;;
+    *) adb_commands $1 $2; exit;;
   esac
   shift
 done

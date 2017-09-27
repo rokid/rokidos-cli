@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+
+const ora = require('ora');
+const noble = require('noble');
+const inquirer = require('inquirer');
+const spinner = ora('Searching device...');
+
+const networkRequest = [{
+  type: 'input',
+  name: 'ssid',
+  message: 'Input your wifi ssid'
+}, {
+  type: 'input',
+  name: 'psk',
+  message: 'Input your wifi psk',
+}];
+
+let blacklist = [];
+
+noble.on('stateChange', function(state) {
+  if (state === 'poweredOn') {
+    noble.startScanning();
+  } else {
+    noble.stopScanning();
+  }
+});
+
+noble.on('discover', function(peripheral) {
+  spinner.start();
+  const ad = peripheral.advertisement;
+  if (ad.localName) {
+    if (blacklist.indexOf(ad.localName) !== -1)
+      return;
+    spinner.stop();
+    noble.stopScanning();
+    inquirer.prompt({
+      type: 'confirm',
+      name: 'confirmed',
+      message: `Found 1 device ${ad.localName}`
+    }).then((result) => {
+      if (!result.confirmed) {
+        blacklist.push(ad.localName);
+        spinner.start();
+        noble.startScanning();
+      } else {
+        startConnect(peripheral);
+      }
+    });
+  }
+});
+
+function startConnect(peripheral) {
+  return tryConnect(peripheral).then(() => {
+    return getServiceByUUID(peripheral, '4000');
+  }).then((service) => {
+    return getPropById(service, '9745');
+  }).then((property) => {
+    console.log(`Selected ${peripheral.advertisement.localName} device`);
+    inquirer.prompt(networkRequest).then((result) => {
+      const data = new Buffer(JSON.stringify(result)).toString('base64');
+      property.write(new Buffer(data), false, (...args) => {
+        console.log('wifi connected');
+        process.exit();
+      });
+    });
+  });
+}
+
+function tryConnect(peripheral) {
+  return new Promise((resolve, reject) => {
+    peripheral.on('disconnect', () => {
+      reject(new Error('peripheral disconnected'));
+    });
+    peripheral.connect((_) => {
+      resolve(peripheral);
+    });
+  });
+}
+
+function getServiceByUUID(peripheral, uuid) {
+  return new Promise((resolve, reject) => {
+    peripheral.discoverServices([], (err, services) => {
+      for (let i in services) {
+        if (services[i].uuid === uuid) {
+          resolve(services[i]);
+          break;
+        }
+      }
+      reject(new Error(`service ${uuid} not found`));
+    });
+  });
+}
+
+function getPropById(service, uuid) {
+  return new Promise((resolve, reject) => {
+    service.discoverCharacteristics([], (err, props) => {
+      for (let i in props) {
+        if (props[i].uuid === uuid) {
+          resolve(props[i]);
+          break;
+        }
+      }
+      reject(new Error(`characteristics ${uuid} not found`));
+    });
+  });
+}
+
+// inquirer.prompt(questions).then(function (answers) {
+//   console.log(JSON.stringify(answers, null, '  '));
+// });
