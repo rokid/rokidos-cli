@@ -19,8 +19,6 @@ rokid run [file]           Run scripts on device
 rokid shell <command>      Wait for an connectable device and shell
 rokid test <dir>           Run tests on your device
 rokid log <filter>         Show the logs of connected device by comma-based filter
-rokid install <dir>        Install the Rokid App from directory
-rokid build <dir>          Build the Rokid App to .rpp
 
 rokid@${VERSION}
 EOF
