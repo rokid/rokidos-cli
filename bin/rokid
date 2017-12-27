@@ -65,7 +65,7 @@ install_rpp() {
   local rpp_path=$1
   if [ -z "$1" ]; then
     build_rpp
-    rpp_path=`find *.rpp | head -n1`
+    rpp_path=`find . -name *.rpp | head -n1`
   fi
   $ADB shell mkdir -p /tmp/installers
   $ADB push $rpp_path /tmp/installers/
