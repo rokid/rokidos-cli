@@ -34,7 +34,13 @@ init_adb() {
   cd $(dirname `readlink -n $0`)
   cd ../
   local root=`pwd`
-  ADB=$root/tools/adb
+  local os = `uname -s`
+  ADB=$root/tools/adb-linux
+  local os=`uname -s`
+  echo "os: $os"
+  if [ $os == "Linux" ]; then
+    ADB=$root/tools/adb-linux
+  fi
   echo "use adb: $ADB"
   cd $oldir
 }
