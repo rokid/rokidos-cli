@@ -85,12 +85,12 @@ run_test() {
   # create test directory
   $ADB shell mkdir -p $testdir
   $ADB shell rm -rf $testdir/*
-  $ADB push ./tests $testdir
+  $ADB push ./tests $testdir/tests
   # change the workdir to source dir
   cd $(dirname $0)
   cd $(dirname `readlink -n $0`)
   cd ../
-  $ADB push lib $testdir
+  $ADB push lib $testdir/lib
   $ADB shell node $testdir/lib/executor.js $1
   $ADB shell rm -r $testdir
 }
