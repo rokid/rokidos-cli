@@ -1,0 +1,24 @@
+{
+    "name": "@rokidapp/rokidos-cli_example",
+    "version": "1.0.0",
+    "description": "example app for rokidos",
+    "main": "app.js",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git@github.com/rokid/rokidos-cli/example"
+    },
+    "keywords": [
+        "nodejs",
+        "rokid"
+    ],
+    "author": "example<example@rokid.com>",
+    "license": "MIT",
+    "metadata": {
+        "type": "cut",
+        "skills": [
+            "example"
+        ],
+        "native": true
+    }
+}

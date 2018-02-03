@@ -9,6 +9,7 @@
   "bin": {
     "ro": "bin/rokid",
     "rokid": "bin/rokid",
+    "rokid-node": "bin/rokid.js",
     "rokid-search": "bin/rokid-search"
   },
   "repository": {
