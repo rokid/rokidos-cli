@@ -8,36 +8,40 @@ test('test 7 play', (t) => {
     'intent': 'play_random',
     'pattern': '^$iwant?$play$one?$keyword$',
     'slots': {}
-  }, {  
-    'appId':'RCAC74F187F34C94B93EE3BAECFCE2E3',
-    'response': {     
+  }, {
+    'appId': 'RCAC74F187F34C94B93EE3BAECFCE2E3',
+    'response': {
       'action': {
         'version': '2.0.0',
         'type': 'NORMAL',
         'form': 'scene',
         'shouldEndSession': true,
         'directives': [{
-          'type':'voice',
+          'type': 'voice',
           'action': 'PLAY',
-          'disableEvent':false,
+          'disableEvent': false,
           'item': {
-            'itemId':'newstestitemid',
+            'itemId': 'newstestitemid',
             'tts': '晚上好，若琪为您播放晚间新闻摘要，首先我们来看看社会新闻。'
           }
         }, {
-          'type':'confirm',
+          'type': 'confirm',
           'confirmIntent': 'nlp intent to confirm',
           'confirmSlot': 'nlp slot to confirm',
           'optionWords': ['word1', 'word2']
         }]
       }
     },
-    'startWithActiveWord':false,
-    'version':'2.0.0'
+    'startWithActiveWord': false,
+    'version': '2.0.0'
   });
 
   Promise.all([
-    t.assert('Voice.FINISHED', {voice: {item: 'newstestitemid'}}),
+    t.assert('Voice.FINISHED', {
+      voice: {
+        item: 'newstestitemid'
+      }
+    }),
     t.assert('siren.statechange', 'open'),
   ]).then(() => {
     t.done();
