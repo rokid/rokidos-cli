@@ -1,129 +1,95 @@
-#!/usr/bin/env bash
+#!/usr/bin/env node
 
-#
-# Setup.
-#
+const path = require('path');
+const fs = require('fs');
+const program = require('commander');
+const ADBKit = require('adbkit');
+const ovs = require('../lib/ovs').getClient();
+const version = require(`${path.join(__dirname, '../package.json')}`).version;
 
-VERSION="0.10.1"
-ADB=""
+const bridge = ADBKit.createClient();
 
-display_help() {
-  cat <<-EOF
+program.version(version);
 
-Usage: rokid [command]
+program
+  .command('devices')
+  .description('列出所有已连接的若琪设备')
+  .action(listDevice);
 
-rokid help                 Get helps
-rokid search               Search your devices and configuring network
-rokid devices              List connected devices
-rokid run [file]           Run scripts on device
-rokid shell <command>      Wait for an connectable device and shell
-rokid test <dir>           Run tests on your device
-rokid log <filter>         Show the logs of connected device by comma-based filter
+program
+  .command('login <user> <pwd>')
+  .description('登录Rokid账号，需要：用户名与密码')
+  .action(async (username, password) => {
+    try {
+      await ovs.login(username, password);
+      console.log('登录成功');
+    } catch (err) {
+      console.log('登录失败:', err.response.data.message);
+    }
+  });
 
-rokid@${VERSION}
-EOF
+program
+  .command('domain <id>')
+  .description('通过技能ID获取对应的意图配置')
+  .action(async (id) => {
+    const intents = await ovs.listIntents(id);
+    intents.ZH.intents.forEach((intent) => {
+      console.log(JSON.stringify(intent, null, 2));
+    });
+  });
+
+program
+  .command('skills')
+  .description('列出你所有的技能ID及名称')
+  .action(async () => {
+    const skills = await ovs.listSkills();
+    const outputs = skills.list.map((skill) => {
+      return `${skill.appId}   ${skill.name}`;
+    }).join('\n');
+    console.log(outputs);
+  });
+
+program
+  .command('compile')
+  .description('上传以及编译你当前目前下intents.json配置到RokidNLP在线服务')
+  .action(async () => {
+    try {
+      const appId = getLocalAppId();
+      const intents = JSON.parse(fs.readFileSync('./intents.json', 'utf8'));
+      await ovs.uploadIntents(appId, intents, true);
+    } catch (err) {
+      console.log(err);
+      console.log(err.response.data);
+    }
+  });
+
+program
+  .command('test <sentence>')
+  .description('在当前目录下发送测试命令（针对已编译的项目有效）')
+  .action(async (sentence) => {
+    const appId = getLocalAppId();
+    const data = await ovs.testIntents(appId, sentence);
+    console.log(JSON.parse(data.nlp));
+  });
+
+program.parse(process.argv);
+
+async function listDevice() {
+  const devices = await bridge.listDevices();
+  devices.forEach((device) => {
+    console.log(device.id + '    ' + device.type);
+  })
 }
 
-display_version() {
-  echo "roah@${VERSION}" && exit 0
+function getLocalAppId() {
+  const packageInfoExists = fs.existsSync('./package.json');
+  if (!packageInfoExists) {
+    return console.error('package.json 不存在');
+  }
+  const packageInfo = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+  const skillIds = packageInfo.metadata.skills;
+  if (skillIds.length !== 1) {
+    return console.error('目前只支持单技能操作')
+  }
+  return skillIds[0];
 }
-
-init_adb() {
-  local oldir=`pwd`
-  cd $(dirname $0)
-  cd $(dirname `readlink -n $0`)
-  cd ../
-  local root=`pwd`
-  ADB=$root/tools/adb
-  echo "use adb: $ADB"
-  cd $oldir
-}
-
-build_rpp() {
-  local current=`pwd`
-  cd $(dirname $0)
-  cd $(dirname `readlink -n $0`)
-  cd ../
-  local root=`pwd`
-  local config=$root/webpack.config.js
-  cd $current
-  $root/node_modules/.bin/webpack \
-    --config $config
-  node $root/postbuild.js
-}
-
-log() {
-  # change the workdir to source dir
-  cd $(dirname $0)
-  cd $(dirname `readlink -n $0`)
-  cd ../
-  # run log-filter
-  run_script lib/log-filter.js $1
-}
-
-install_rpp() {
-  local rpp_path=$1
-  if [ -z "$1" ]; then
-    build_rpp
-    rpp_path=`find . -name *.rpp | head -n1`
-  fi
-  $ADB shell mkdir -p /tmp/installers
-  $ADB push $rpp_path /tmp/installers/
-  $ADB shell pkgm-install $rpp_path
-  printf "\033[32m$rpp_path installed\033[0m\n"
-}
-
-run_script() {
-  local filename=$(basename "$1")
-  $ADB push $1 /tmp/$filename
-  $ADB shell NODE_PATH=/usr/lib/node_modules node /tmp/$filename $2
-  $ADB shell rm /tmp/$filename
-}
-
-run_test() {
-  local testdir=/tmp/tests
-  # create test directory
-  $ADB shell mkdir -p $testdir
-  $ADB shell rm -rf $testdir/*
-  $ADB push ./tests $testdir
-  # change the workdir to source dir
-  cd $(dirname $0)
-  cd $(dirname `readlink -n $0`)
-  cd ../
-  $ADB push lib $testdir
-  $ADB shell node $testdir/lib/executor.js $1
-  $ADB shell rm -r $testdir
-}
-
-debug_mode() {
-  $ADB shell killall -9 ams
-  $ADB shell killall -9 node
-  $ADB shell NODE_PATH=/usr/lib/node_modules ams
-}
-
-adb_commands() {
-  init_adb
-  $ADB wait-for-device
-  case $1 in
-    devices) $ADB devices; exit ;;
-    shell) $ADB shell; exit ;;
-    node ) $ADB shell NODE_PATH=/usr/lib/node_modules node; exit ;;
-    log) log $2; exit ;;
-    install) install_rpp $2; exit ;;
-    build) build_rpp $2; exit ;;
-    run) run_script $2; exit ;;
-    test) run_test $2; exit ;;
-    debug) debug_mode; exit ;; # to be removed
-    *) display_help; exit ;;
-  esac
-}
-
-while test $# -ne 0; do
-  case $1 in
-    -V|--version) display_version ;;
-    -h|--help|help) display_help; exit ;;
-    search) rokid-search; exit ;;
-    *) adb_commands $1 $2; exit;;
-  esac
-  shift
-done

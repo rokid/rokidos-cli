@@ -1,0 +1,19 @@
+{
+  "name": "exampleapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "metadata": {
+    "skills": [
+      "R0852A9F34A94943ADA2B7BF8CF86A9B"
+    ]
+  }
+}

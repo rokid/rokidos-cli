@@ -1,0 +1,27 @@
+{
+  "intents": [
+    {
+      "intent": "Get_Notification",
+      "slots": [],
+      "user_says": [
+        "有什么新消息吗",
+        "哈哈哈",
+        "啦啦啦"
+      ]
+    },
+    {
+      "intent": "Open_Wechat",
+      "slots": [],
+      "user_says": [
+        "打开微信",
+        "帮我打开微信"
+      ]
+    },
+    {
+      "intent": "Open_chongya",
+      "user_says": [
+        "我要开外部接口"
+      ]
+    }
+  ]
+}

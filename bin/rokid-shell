@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+#
+# Setup.
+#
+
+VERSION="0.10.1"
+ADB=""
+
+display_help() {
+  cat <<-EOF
+
+Usage: rokid [command]
+
+rokid help                 Get helps
+rokid search               Search your devices and configuring network
+rokid devices              List connected devices
+rokid run [file]           Run scripts on device
+rokid shell <command>      Wait for an connectable device and shell
+rokid test <dir>           Run tests on your device
+rokid log <filter>         Show the logs of connected device by comma-based filter
+
+rokid@${VERSION}
+EOF
+}
+
+display_version() {
+  echo "roah@${VERSION}" && exit 0
+}
+
+init_adb() {
+  local oldir=`pwd`
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  local root=`pwd`
+  ADB=$root/tools/adb
+  echo "use adb: $ADB"
+  cd $oldir
+}
+
+build_rpp() {
+  local current=`pwd`
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  local root=`pwd`
+  local config=$root/webpack.config.js
+  cd $current
+  $root/node_modules/.bin/webpack \
+    --config $config
+  node $root/postbuild.js
+}
+
+log() {
+  # change the workdir to source dir
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  # run log-filter
+  run_script lib/log-filter.js $1
+}
+
+install_rpp() {
+  local rpp_path=$1
+  if [ -z "$1" ]; then
+    build_rpp
+    rpp_path=`find . -name *.rpp | head -n1`
+  fi
+  $ADB shell mkdir -p /tmp/installers
+  $ADB push $rpp_path /tmp/installers/
+  $ADB shell pkgm-install $rpp_path
+  printf "\033[32m$rpp_path installed\033[0m\n"
+}
+
+run_script() {
+  local filename=$(basename "$1")
+  $ADB push $1 /tmp/$filename
+  $ADB shell NODE_PATH=/usr/lib/node_modules node /tmp/$filename $2
+  $ADB shell rm /tmp/$filename
+}
+
+run_test() {
+  local testdir=/tmp/tests
+  # create test directory
+  $ADB shell mkdir -p $testdir
+  $ADB shell rm -rf $testdir/*
+  $ADB push ./tests $testdir
+  # change the workdir to source dir
+  cd $(dirname $0)
+  cd $(dirname `readlink -n $0`)
+  cd ../
+  $ADB push lib $testdir
+  $ADB shell node $testdir/lib/executor.js $1
+  $ADB shell rm -r $testdir
+}
+
+debug_mode() {
+  $ADB shell killall -9 ams
+  $ADB shell killall -9 node
+  $ADB shell NODE_PATH=/usr/lib/node_modules ams
+}
+
+adb_commands() {
+  init_adb
+  $ADB wait-for-device
+  case $1 in
+    devices) $ADB devices; exit ;;
+    shell) $ADB shell; exit ;;
+    node ) $ADB shell NODE_PATH=/usr/lib/node_modules node; exit ;;
+    log) log $2; exit ;;
+    install) install_rpp $2; exit ;;
+    build) build_rpp $2; exit ;;
+    run) run_script $2; exit ;;
+    test) run_test $2; exit ;;
+    debug) debug_mode; exit ;; # to be removed
+    *) display_help; exit ;;
+  esac
+}
+
+while test $# -ne 0; do
+  case $1 in
+    -V|--version) display_version ;;
+    -h|--help|help) display_help; exit ;;
+    search) rokid-search; exit ;;
+    *) adb_commands $1 $2; exit;;
+  esac
+  shift
+done
